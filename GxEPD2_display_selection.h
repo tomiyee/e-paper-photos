@@ -16,5 +16,5 @@
 // Add new topics in https://forum.arduino.cc/c/using-arduino/displays/23 for new questions and issues
 
 #if defined(ESP32)
-GxEPD2_BW<GxEPD2_420, GxEPD2_420::HEIGHT> display(GxEPD2_420(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4)); // GDEW042T2 400x300, UC8176 (IL0398)
+GxEPD2_BW<GxEPD2_420, GxEPD2_420::HEIGHT> display(GxEPD2_420(/*CS=5*/ SS, /*DC=*/17, /*RST=*/16, /*BUSY=*/4)); // GDEW042T2 400x300, UC8176 (IL0398)
 #endif

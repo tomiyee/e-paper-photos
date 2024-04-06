@@ -348,50 +348,6 @@ void deepSleepTest()
   // Serial.println("deepSleepTest done");
 }
 
-void showBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool partial)
-{
-  // Serial.println("showBox");
-  display.setRotation(1);
-  if (partial)
-  {
-    display.setPartialWindow(x, y, w, h);
-  }
-  else
-  {
-    display.setFullWindow();
-  }
-  display.firstPage();
-  do
-  {
-    display.fillScreen(GxEPD_WHITE);
-    display.fillRect(x, y, w, h, GxEPD_BLACK);
-  } while (display.nextPage());
-  // Serial.println("showBox done");
-}
-
-void drawCornerTest()
-{
-  display.setFullWindow();
-  display.setFont(&FreeMonoBold9pt7b);
-  display.setTextColor(GxEPD_BLACK);
-  for (uint16_t r = 0; r <= 4; r++)
-  {
-    display.setRotation(r);
-    display.firstPage();
-    do
-    {
-      display.fillScreen(GxEPD_WHITE);
-      display.fillRect(0, 0, 8, 8, GxEPD_BLACK);
-      display.fillRect(display.width() - 18, 0, 16, 16, GxEPD_BLACK);
-      display.fillRect(display.width() - 25, display.height() - 25, 24, 24, GxEPD_BLACK);
-      display.fillRect(0, display.height() - 33, 32, 32, GxEPD_BLACK);
-      display.setCursor(display.width() / 2, display.height() / 2);
-      display.print(display.getRotation());
-    } while (display.nextPage());
-    delay(2000);
-  }
-}
-
 void showFont(const char name[], const GFXfont *f)
 {
   display.setFullWindow();
@@ -527,12 +483,6 @@ void drawBitmaps400x300()
   }
 }
 #endif
-
-struct bitmap_pair
-{
-  const unsigned char *black;
-  const unsigned char *red;
-};
 
 void drawGraphics()
 {

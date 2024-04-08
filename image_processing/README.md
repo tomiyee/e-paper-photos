@@ -17,7 +17,7 @@ To begin with, make sure you have an installation of Python on your device. Next
 python -m venv venv
 ```
 
-Next, you must activate the virtual environment. You know that you have successfully done so if your terminal now has a `(venv)` prefix. Look up the specific command to run depending on the terminal you are using. 
+Next, you must activate the virtual environment. You know that you have successfully done so if your terminal now has a `(venv)` prefix. Look up the specific command to run depending on the terminal you are using [here](https://docs.python.org/3/library/venv.html#how-venvs-work). 
 
 > Note for Powershell users: To activate the virtual envornment, you may need to set the ExecutionPolicy to unrestricted. 
 > ```

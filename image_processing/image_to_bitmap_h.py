@@ -1,12 +1,12 @@
 from PIL import Image
 import numpy as np
 
-def load_png_image(filename):
+def load_png_image(filename: str) -> np.ndarray:
   im_frame = Image.open(filename)
   np_frame = np.array(im_frame.getdata())
   return np_frame
 
-def image_to_bitmap(image):
+def image_to_bitmap(image: np.ndarray) -> np.ndarray:
   # group the image into 8 columns of 0s and 1s
   # Any pixel with a value less than 254 is considered 0
   image = image.reshape(-1, 8)//255
@@ -18,7 +18,7 @@ def image_to_bitmap(image):
   image = np.array([hex(row) for row in image])
   return image
 
-def bitmap_to_c_array(bitmap):
+def bitmap_to_c_array(bitmap: np.ndarray) -> str:
   # separate the bitmap into columns of 10 and join as a grid
   bitmap = bitmap.reshape(-1, 20)
   # convert each row to a string

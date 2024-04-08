@@ -26,6 +26,8 @@ def bitmap_to_c_array(bitmap: np.ndarray) -> str:
   return "#define _GxBitmaps400x300_H_\n\n#include <pgmspace.h>\n\nconst unsigned char bitmap[] PROGMEM = {\n" +  ",\n".join(bitmap) + "};"
 
 if __name__ == "__main__":
+  # Assumes that `image.png` is a 400x300 Black and White dithered image 
+  # (only values 0 or 255)
   image = load_png_image("image.png")
   bitmap = image_to_bitmap(image)
   file_contents = bitmap_to_c_array(bitmap)

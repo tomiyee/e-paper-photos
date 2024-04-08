@@ -7,7 +7,7 @@ import glob
 register_heif_opener()
 
 input_dir = "input_images"
-
+output_dir = "output_images"
 if __name__ == "__main__":
   """
   Reads all of the images in the `input_images` directory.
@@ -28,7 +28,7 @@ if __name__ == "__main__":
       im_frame = im_frame.resize((400, 300))
       # Converts to 1-bit repr per pixel. Uses Floyd-Steinberg dithering
       im_frame = im_frame.convert("1")
-      im_frame.save(f"output_images/{filename}.bmp")
+      im_frame.save(f"{output_dir}/{filename}.bmp")
     except Exception as e:
       print("Failed to process:", filepath)
       print(e)

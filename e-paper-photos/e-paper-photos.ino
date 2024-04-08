@@ -4,7 +4,6 @@
 #define ESP32 true
 
 #include <GxEPD2_BW.h>
-// #include <Fonts/FreeMonoBold9pt7b.h>
 
 // select the display constructor line in one of the following files (old style):
 #include "GxEPD2_display_selection.h"
@@ -13,7 +12,7 @@
 // #include "GxEPD2_display_selection_new_style.h"
 
 #if !defined(__AVR) && !defined(STM32F1xx)
-#include "custom_bitmap.h"
+#include "custom_bitmaps.h"
 #endif
 
 void setup()

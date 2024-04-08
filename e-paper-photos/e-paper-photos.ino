@@ -1,15 +1,16 @@
 
+#include <HardwareSerial.h>
 #define ENABLE_GxEPD2_GFX 0
 #define ESP32 true
 
 #include <GxEPD2_BW.h>
-#include <Fonts/FreeMonoBold9pt7b.h>
+// #include <Fonts/FreeMonoBold9pt7b.h>
 
 // select the display constructor line in one of the following files (old style):
 #include "GxEPD2_display_selection.h"
 
 // or select the display class and display driver class in the following file (new style):
-#include "GxEPD2_display_selection_new_style.h"
+// #include "GxEPD2_display_selection_new_style.h"
 
 #if !defined(__AVR) && !defined(STM32F1xx)
 #include "custom_bitmap.h"
@@ -25,15 +26,16 @@ void setup()
   display.init(115200, true, 2, false);
   // first update should be full refresh
   clearScreen();
-  delay(1000);
-  drawBitmaps();
+  display.setRotation(0);
+  display.setFullWindow();
+  drawBitmaps400x300();
   display.powerOff();
-  Serial.println("setup done");
   display.end();
 }
 
 void loop()
 {
+  // Todo: Loop through multiple images
 }
 
 /**
@@ -63,7 +65,6 @@ void drawBitmaps400x300()
   do
   {
     display.fillScreen(GxEPD_WHITE);
-    display.drawInvertedBitmap(0, 0, Bitmap400x300_1, 400, 300, GxEPD_BLACK);
+    display.drawInvertedBitmap(0, 0, bitmap, 400, 300, GxEPD_BLACK);
   } while (display.nextPage());
-  delay(2000);
 }

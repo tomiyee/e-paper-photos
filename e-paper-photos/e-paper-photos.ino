@@ -4,7 +4,6 @@
 #define ESP32 true
 
 #include <GxEPD2_BW.h>
-// #include <Fonts/FreeMonoBold9pt7b.h>
 
 // select the display constructor line in one of the following files (old style):
 #include "GxEPD2_display_selection.h"
@@ -13,8 +12,10 @@
 // #include "GxEPD2_display_selection_new_style.h"
 
 #if !defined(__AVR) && !defined(STM32F1xx)
-#include "custom_bitmap.h"
+#include "custom_bitmaps.h"
 #endif
+
+const unsigned photo_change_delay = 30 * 1000;
 
 void setup()
 {
@@ -28,14 +29,11 @@ void setup()
   clearScreen();
   display.setRotation(0);
   display.setFullWindow();
-  drawBitmaps400x300();
-  display.powerOff();
-  display.end();
 }
 
 void loop()
 {
-  // Todo: Loop through multiple images
+  drawBitmaps400x300();
 }
 
 /**
@@ -52,19 +50,17 @@ void clearScreen()
   } while (display.nextPage());
 }
 
-void drawBitmaps()
-{
-  display.setRotation(0);
-  display.setFullWindow();
-  drawBitmaps400x300();
-}
-
 void drawBitmaps400x300()
 {
-  display.firstPage();
-  do
+  for (int i = 0; i < sizeof(bitmaps); i++)
   {
-    display.fillScreen(GxEPD_WHITE);
-    display.drawInvertedBitmap(0, 0, bitmap, 400, 300, GxEPD_BLACK);
-  } while (display.nextPage());
+    display.firstPage();
+    do
+    {
+      display.fillScreen(GxEPD_WHITE);
+      display.drawInvertedBitmap(0, 0, bitmaps[i], 400, 300, GxEPD_BLACK);
+    } while (display.nextPage());
+    display.powerOff();
+    delay(photo_change_delay);
+  }
 }

@@ -63,13 +63,16 @@ def perform_script() -> None:
   if answers["output"] == HEADER_OPTION:
     answers = inquirer.prompt([
       inquirer.Text(
-        "header_file_name", 
-        message="Name for the Header File", 
+        "header_file_name",
+        message="Name for the Header File",
         default="custom_bitmaps.h"
       )
     ])
     if answers is not None:
-      generate_bitmap_h(input_dir=output_dir, output_file=answers["header_file_name"])
+      generate_bitmap_h(
+        input_dir=output_dir,
+        output_file=answers["header_file_name"]
+      )
 
 if __name__ == "__main__":
    perform_script()

@@ -6,8 +6,6 @@ import glob
 # Enables opening HEIF files in default supported by PIL
 register_heif_opener()
 
-input_dir = "output_images"
-
 def generate_bitmap_h (input_dir='output_images', output_file='custom_bitmaps.h') -> None:
   """Converts `.bmp` images in the `input_dir` to group of uint_8 arrays in a header file with the name `output_file`
 

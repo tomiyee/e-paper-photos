@@ -21,12 +21,10 @@ Before using the Python Scripts, install the dependencies in `requirements.txt`.
 
 ## The Script
 
-The main utility in this script is to process any images in the `/input_images` directory place the resulting binary images (`.bmp` files) in the `/output_images` directory. 
-
 Place horizontal images in the `/input_images` directory before running the script. It should support most image formats, including PNG, JPG, and HEIF files.
 
 ```bash
-python generate_bmp_files.py
+python main.py
 ```
 
-The color images are converted to binary images (each pixel is either pure black or white) using the Floyd-Steinberg dithering algorithm.
+The color images are converted to binary images (each pixel is either pure black or white) using the Floyd-Steinberg dithering algorithm. If you want to load the BMP files from an SD card, you are done. Otherwise, the scsript will generate a header file with the bitmaps loaded as a list of char arrays.

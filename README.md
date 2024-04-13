@@ -16,9 +16,11 @@ This step is optional, depending on the preferred IDE. One could just as easily 
 
 ### 3. Hardware
 
-I'm using an E-Ink screen (`4.2" b/w`) I bought online for this project. 
+I bought this 4.2 inch E-Paper module by Waveshare [here](https://www.waveshare.com/product/displays/e-paper/epaper-2/4.2inch-e-paper-module.htm). 
 
 The micro-controller I am using is an ESP32. 
+
+At the product link on the Waveshare website, there are a variety of resources for using the device, such as example code for a variety of microcontrollers, like the ESP32 that I have.
 
 ## Development
 

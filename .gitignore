@@ -166,3 +166,5 @@ cython_debug/
 /image_processing/output_images/*
 !/image_processing/output_images/README.md
 image_processing/custom_bitmaps.h
+
+custom_bitmaps.h

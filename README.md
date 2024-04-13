@@ -22,3 +22,7 @@ The micro-controller I am using is an ESP32.
 
 ## Development
 
+```bash
+python style.py
+```
+

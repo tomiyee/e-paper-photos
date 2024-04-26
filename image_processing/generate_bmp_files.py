@@ -2,6 +2,7 @@ from typing import List, Tuple
 from PIL import Image, ImageOps
 from pillow_heif import register_heif_opener
 import glob
+from tqdm import tqdm
 
 # Enables opening HEIF files in default supported by PIL
 register_heif_opener()
@@ -19,11 +20,11 @@ def load_images(
     """
     images = []
     input_dir_len = len(input_directory) + 1
-    for filepath in glob.glob(f"{input_directory}/*"):
+    for filepath in tqdm(glob.glob(f"{input_directory}/*"), desc="Reading Images"):
         filename = "".join(filepath[input_dir_len:].split(".")[:-1])
         # Ignore the README file in the input directory
         if filepath.endswith("README.md"):
-            break
+            continue
         try:
             im_frame = Image.open(filepath)
             # JPEGs can have EXIF Orientation Data sometimes

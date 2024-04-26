@@ -4,6 +4,7 @@ import inquirer
 import numpy as np
 from pillow_heif import register_heif_opener
 import glob
+from tqdm import tqdm
 
 # Enables opening HEIF files in default supported by PIL
 register_heif_opener()
@@ -20,7 +21,7 @@ def generate_bitmap_h(bmp_imgs: List[Image.Image]) -> str:
     """
     # A list of strings, each a variable defn for a bitmap in C
     bitmaps: List[str] = []
-    for bitmap_image in bmp_imgs:
+    for bitmap_image in tqdm(bmp_imgs, desc="Convert to Header File"):
         # Read the image, giving a single bit to each pixel
         bitmap_image = bitmap_image.convert("L")
         palette = sorted(list(set(bitmap_image.getdata())))

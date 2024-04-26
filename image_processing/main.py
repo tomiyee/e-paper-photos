@@ -1,5 +1,6 @@
 from typing import Literal
 import inquirer
+from tqdm import tqdm
 from generate_bitmap_h import generate_bitmap_h
 from generate_bmp_files import convert_to_bmp, load_images
 from PIL import Image
@@ -49,7 +50,7 @@ def perform_script() -> None:
             inquirer.Text(
                 Field.COLORS,
                 message="Number of colors (binary is 2)",
-                default="2",
+                default="4",
                 validate=positive_integer,
             ),
             inquirer.Path(
@@ -75,7 +76,7 @@ def perform_script() -> None:
         )
         bmp_image_data = [
             (filename, convert_to_bmp(image, colors=int(answers[Field.COLORS])))
-            for filename, image in raw_image_data
+            for filename, image in tqdm(raw_image_data, desc="Convert to BMP Files")
         ]
         return bmp_image_data
 

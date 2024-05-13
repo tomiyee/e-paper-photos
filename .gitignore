@@ -168,3 +168,5 @@ cython_debug/
 image_processing/custom_bitmaps.h
 
 custom_bitmaps.h
+
+e-paper-photos-idf/build/

@@ -39,7 +39,6 @@
 #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP 15     /* Time ESP32 will go to sleep (in seconds) */
 
-Epd epd;
 
 void setup()
 {
@@ -48,16 +47,7 @@ void setup()
 
   
   // Schedules a time to automatically wake up from deep sleep
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-
-  // // Turn off the Red LED. Turns on the Blue LED to indicate it is awake and working
-  gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-  gpio_set_level(GPIO_NUM_2, 1);
-  gpio_set_level(GPIO_NUM_13, 0);
-
-  // Initialize the E Paper Display
-  epd.Init_4Gray();
-  epd.ClearFrame();
+  // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
 
   // Incrememnt Index by one, looping back around if necessary
   const int numImages = countFilesInDir("/bitmaps");
@@ -67,20 +57,22 @@ void setup()
   EEPROM.commit();
 
   const ImageBuffer imageBuffer = loadImage("/bitmaps", i);
-  
+  Serial.println(imageBuffer.size);
+  Epd epd;
+  /* This clears the SRAM of the e-paper display */
+  epd.Clear();
+  epd.Init_4Gray();
+
+
   // Show the image of the appropriate index
   epd.Set_4GrayDisplay((const unsigned char *)imageBuffer.data, 0, 0, 400, 300);
-  gpio_set_level(GPIO_NUM_2, 0);
+  free(imageBuffer.data);
+  
 
   // Sleep. When it wakes, it will re-run setup
-  esp_deep_sleep_start();
+  // esp_deep_sleep_start();
 }
 
 void loop() {
-  for (int i = 0; i < sizeof(bitmaps); i++)
-  {
-    epd.Set_4GrayDisplay(bitmaps[i], 0, 0,  400,300);
-    delay(30000);
-  }
 }
 

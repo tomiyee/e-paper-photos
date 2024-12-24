@@ -1,27 +1,8 @@
 /**
- *  @filename   :   epd4in2_V2.cpp
- *  @brief      :   Implements for Dual-color e-paper library
- *  @author     :   Yehui from Waveshare
- *
- *  Copyright (C) Waveshare     August 10 2017
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documnetation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to  whom the Software is
- * furished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS OR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Original filename : epd4in2_V2.cpp
+ * Original author   : Yehui from Waveshare
+ * Modified by       : Tommy Seng Heng
+ * @brief            : Implements Dual-color e-paper library
  */
 
 #include <stdlib.h>
@@ -408,10 +389,10 @@ void Epd::Display_Partial(unsigned char* Image, unsigned int  Xstart, unsigned i
 
 	Xend -= 1;
 	Yend -= 1;	
-	//Reset
+	// Reset
 	Reset();
 
-	SendCommand(0x3C); //BorderWavefrom
+	SendCommand(0x3C); // BorderWavefrom
 	SendData(0x80);	
     
     SendCommand(0x21); 
@@ -543,9 +524,9 @@ void Epd::Set_4GrayDisplay(const unsigned char *imageData, int startX, int start
                         else if (pixelPair == 0x00)
                             processedByte |= 0x00; // Black
                         else if (pixelPair == 0x40)
-                            processedByte |= 0x01; // Gray1
+                            processedByte |= 0x01; // Dark gray
                         else
-                            processedByte |= 0x00; // Gray2
+                            processedByte |= 0x00; // Light gray
 
                         processedByte <<= 1; // Shift to prepare for the next pixel
                         currentByte <<= 2;   // Move to the next pixel pair
@@ -557,9 +538,9 @@ void Epd::Set_4GrayDisplay(const unsigned char *imageData, int startX, int start
                         else if (pixelPair == 0x00)
                             processedByte |= 0x00; // Black
                         else if (pixelPair == 0x40)
-                            processedByte |= 0x01; // Gray1
+                            processedByte |= 0x01; // Dark gray
                         else
-                            processedByte |= 0x00; // Gray2
+                            processedByte |= 0x00; // Light gray 
 
                         if (subRow != 1 || subCol != 1) // Avoid extra shift at the end
                             processedByte <<= 1;

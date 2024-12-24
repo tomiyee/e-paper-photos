@@ -36,18 +36,19 @@
 // define the number of bytes (max 512) you want to access
 #define EEPROM_SIZE 1
 
-#define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP 15     /* Time ESP32 will go to sleep (in seconds) */
+/* Conversion factor for micro seconds to seconds */
+#define uS_TO_S_FACTOR 1000000
+/** Time ESP32 will go to sleep (in seconds) (Can't be 1H or more due to uS repr as 64 bit) */
+#define TIME_TO_SLEEP 1800
 
 
 void setup()
 {
   Serial.begin(115200);
   initSD();
-
   
   // Schedules a time to automatically wake up from deep sleep
-  // esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
 
   // Incrememnt Index by one, looping back around if necessary
   const int numImages = countFilesInDir("/bitmaps");
@@ -57,8 +58,8 @@ void setup()
   EEPROM.commit();
 
   const ImageBuffer imageBuffer = loadImage("/bitmaps", i);
-  Serial.println(imageBuffer.size);
   Epd epd;
+  epd.Reset();
   /* This clears the SRAM of the e-paper display */
   epd.Clear();
   epd.Init_4Gray();
@@ -68,11 +69,11 @@ void setup()
   epd.Set_4GrayDisplay((const unsigned char *)imageBuffer.data, 0, 0, 400, 300);
   free(imageBuffer.data);
   
-
+  epd.Sleep();
   // Sleep. When it wakes, it will re-run setup
-  // esp_deep_sleep_start();
+  esp_deep_sleep_start();
 }
 
-void loop() {
-}
+// When it wakes from deep sleep, it re-runs setup, so loop is unnecessary. 
+void loop() {}
 

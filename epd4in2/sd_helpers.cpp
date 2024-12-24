@@ -5,15 +5,18 @@
 #include "SPI.h"
 #include "sd_helpers.h"
 
-SPIClass sdSpi; // Create an SPI instance for SD SPI
+// Not using HSPI bc for some reason it kept boot cycling.
+SPIClass sdSpi;
 
 void initSD () {
-  // Initialize HSPI with custom pins
+  Serial.println("Intializing micro-SD module");
+  // Initialize SPI for the SD card with custom pins
   sdSpi.begin(SD_SPI_SCK, SD_SPI_MISO, SD_SPI_MOSI, SD_SPI_CS);
   if(!SD.begin(SD_SPI_CS, sdSpi)){
     Serial.println("Card Mount Failed");
     return;
   }
+  Serial.println("Successfully initialized micro-SD module");
 }
 
 int countFilesInDir(const char* dirPath) {
@@ -86,10 +89,5 @@ ImageBuffer loadImage(const char* dirPath, const int imageIndex) {
     file.close();
 
     return buffer;
-    
-    // Free the allocated memory
-    // free(fileContents);
   }
 }
-
-

@@ -41,7 +41,6 @@
 /** Time ESP32 will go to sleep (in seconds) (Can't be 1H or more due to uS repr as 64 bit) */
 #define TIME_TO_SLEEP 1800
 
-
 void setup()
 {
   Serial.begin(115200);

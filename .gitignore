@@ -162,9 +162,13 @@ cython_debug/
 
 # Ignore all files in the input and output folders except the README
 /image_processing/input_images/*
-!/image_processing/input_images/README.md
+!/image_processing/input_images/.README.md
 /image_processing/output_images/*
-!/image_processing/output_images/README.md
+!/image_processing/output_images/.README.md
+/image_processing/preview_images/*
+!/image_processing/preview_images/.README.md
 image_processing/custom_bitmaps.h
 
 custom_bitmaps.h
+
+e-paper-photos-idf/build/

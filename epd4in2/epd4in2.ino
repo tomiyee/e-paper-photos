@@ -28,6 +28,9 @@
 #include <SPI.h>
 #include "epd4in2.h"
 #include "sd_helpers.h"
+// Uncomment the next line if opting for the bitmap header file
+// #include "custom_bitmaps.h"
+// @todo reimplement custom-bitmap code to conveniently swap between them.
 
 #define COLORED 0
 #define UNCOLORED 1

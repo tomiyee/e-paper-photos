@@ -4,4 +4,4 @@ This directory is an Arduino project built from the Waveshare provided [code for
 
 ## SD Helpers
 
-Assumes that `.bin` files are uploaded into 
+Assumes that `.bin` files are uploaded into the `/bitmaps` directory in an SD card connected to the pins specified in `sd_helpers.h`

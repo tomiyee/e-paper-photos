@@ -26,8 +26,6 @@
 
 #include <EEPROM.h>
 #include "epd4in2.h"
-#include "imagedata.h"
-#include "epdpaint.h"
 #include "custom_bitmaps.h"
 
 #define COLORED 0

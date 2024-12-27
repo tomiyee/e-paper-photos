@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> 1cea4f3b6bde534492765af1b54b36ab5e6c7de8
 #include <SPI.h>
 #include "FS.h"
 #include "SD.h"
@@ -93,8 +89,4 @@ ImageBuffer loadImage(const char* dirPath, const int imageIndex) {
 
     return buffer;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 1cea4f3b6bde534492765af1b54b36ab5e6c7de8

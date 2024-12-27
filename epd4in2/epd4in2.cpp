@@ -1,27 +1,8 @@
 /**
- *  @filename   :   epd4in2.cpp
- *  @brief      :   Implements for Dual-color e-paper library
- *  @author     :   Yehui from Waveshare
- *
- *  Copyright (C) Waveshare     August 10 2017
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documnetation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to  whom the Software is
- * furished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS OR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * Original filename : epd4in2_V2.cpp
+ * Original author   : Yehui from Waveshare
+ * Modified by       : Tommy Seng Heng
+ * @brief            : Implements Dual-color e-paper library
  */
 
 #include <stdlib.h>
@@ -40,87 +21,182 @@ Epd::Epd() {
 };
 
 int Epd::Init(void) {
+    Serial.println("Initializing");
     /* this calls the peripheral hardware interface, see epdif */
     if (IfInit() != 0) {
         return -1;
     }
     /* EPD hardware init start */
     Reset();
-    SendCommand(0x01);
-    SendData(0x03);                  // VDS_EN, VDG_EN
-    SendData(0x00);                  // VCOM_HV, VGHL_LV[1], VGHL_LV[0]
-    SendData(0x2b);                  // VDH
-    SendData(0x2b);                  // VDL
+    ReadBusy();
 
-    SendCommand(0x06);
-    SendData(0x17);
-    SendData(0x17);
-    SendData(0x17);                  //07 0f 17 1f 27 2F 37 2f
-    SendCommand(0x04);
-    WaitUntilIdle();
-    SendCommand(0x00);
-    SendData(0xbf);    // KW-BF   KWR-AF  BWROTP 0f
+    // Performs SW Reset
+    SendCommand(0x12);
+    ReadBusy();
+    // Display Update Control 1
+    SendCommand(0x21);
+    SendData(0x40);
+    SendData(0x00);
 
-    SendCommand(0x30);
-    SendData(0x3c);        // 3A 100HZ   29 150Hz 39 200HZ  31 171HZ
+    SendCommand(0x3C);
+    SendData(0x05);
 
-    SendCommand(0x61); // resolution setting
-    SendData(0x01);
-    SendData(0x90); //128
-    SendData(0x01); //
-    SendData(0x2c);
+    SendCommand(0x11);
+    SendData(0x03);
 
-    SendCommand(0x82); // vcom_DC setting
-    SendData(0x12);
-
-    SendCommand(0X50); // VCOM AND DATA INTERVAL SETTING
-    SendData(0x97); // 97white border 77black border    VBDF 17|D7 VBDW 97 VBDB 57    VBDF F7 VBDW 77 VBDB 37  VBDR B7
-
-    SetLut();
+    SendCommand(0x44); 
+    SendData(0x00);
+    SendData(0x31); 
     
+    SendCommand(0x45);
+    SendData(0x00);
+    SendData(0x00);  
+    SendData(0x2B);
+    SendData(0x01);
+
+    SendCommand(0x4E); 
+    SendData(0x00);
+
+    SendCommand(0x4F); 
+    SendData(0x00);
+    SendData(0x00);  
+    ReadBusy();
+    
+    Serial.println("  Initialized");
     /* EPD hardware init end */
     return 0;
 }
 
-int Epd::Init_4Gray(void) {
-	/* this calls the peripheral hardware interface, see epdif */
-	if (IfInit() != 0) {
+int Epd::Init_Fast(char mode) {
+    /* this calls the peripheral hardware interface, see epdif */
+    if (IfInit() != 0) {
         return -1;
     }
     /* EPD hardware init start */
     Reset();
-	SendCommand(0x01);			//POWER SETTING
-	SendData (0x03);
-	SendData (0x00);       //VGH=20V,VGL=-20V
-	SendData (0x2b);		//VDH=15V															 
-	SendData (0x2b);		//VDL=-15V
-	SendData (0x13);
+    ReadBusy();
 
-	SendCommand(0x06);         //booster soft start
-	SendData (0x17);		//A
-	SendData (0x17);		//B
-	SendData (0x17);		//C 
+    SendCommand(0x12);
+    ReadBusy();
 
-	SendCommand(0x04);
-	WaitUntilIdle();
+    SendCommand(0x21);
+    SendData(0x40);
+    SendData(0x00);
 
-	SendCommand(0x00);			//panel setting
-	SendData(0x3f);		//KW-3f   KWR-2F	BWROTP 0f	BWOTP 1f
+    SendCommand(0x3C);
+    SendData(0x05);
 
-	SendCommand(0x30);			//PLL setting
-	SendData (0x3c);      	//100hz 
+    if(mode == Seconds_1_5S)
+    {
+        SendCommand(0x1A);
+        SendData(0x6E); 
+    }
+    else
+    {
+        SendCommand(0x1A);
+        SendData(0x5A);
+    } 
 
-	SendCommand(0x61);			//resolution setting
-	SendData (0x01);		//400
-	SendData (0x90);     	 
-	SendData (0x01);		//300
-	SendData (0x2c);
+    SendCommand(0x22);
+    SendData(0x91);
+    SendCommand(0x20);  
+    ReadBusy();
 
-	SendCommand(0x82);			//vcom_DC setting
-	SendData (0x12);
+    SendCommand(0x11);
+    SendData(0x03);
 
-	SendCommand(0X50);			//VCOM AND DATA INTERVAL SETTING			
-	SendData(0x97);
+    SendCommand(0x44);
+    SendData(0x00);
+    SendData(0x31); 
+
+    SendCommand(0x45);
+    SendData(0x00);
+    SendData(0x00);  
+    SendData(0x2B);
+    SendData(0x01);
+
+    SendCommand(0x4E); 
+    SendData(0x00);
+
+    SendCommand(0x4F); 
+    SendData(0x00);
+    SendData(0x00); 
+    ReadBusy();
+    /* EPD hardware init end */
+    return 0;
+}
+
+void Epd::Lut(void){
+        SendCommand(0x32);
+        for(int i=0; i<227; i++)
+            SendData(LUT_ALL[i]);
+
+        SendCommand(0x3F);
+        SendData(LUT_ALL[227]);
+
+        SendCommand(0x03);
+        SendData(LUT_ALL[228]);
+
+        SendCommand(0x04);
+        SendData(LUT_ALL[229]);
+        SendData(LUT_ALL[230]);
+        SendData(LUT_ALL[231]);
+
+        SendCommand(0x2c);
+        SendData(LUT_ALL[232]);
+}
+
+        
+int Epd::Init_4Gray(void) {
+  Serial.println("Init 4Gray");
+	/* this calls the peripheral hardware interface, see epdif */
+	if (IfInit() != 0) {
+    Serial.println("IfInit failed");
+        return -1;
+    }
+    /* EPD hardware init start */
+    Reset();
+    ReadBusy();
+    // SW Reset
+    SendCommand(0x12);
+    ReadBusy();
+
+    SendCommand(0x21);
+    SendData(0x00);
+    SendData(0x00);
+
+    SendCommand(0x3C);
+    SendData(0x03);
+
+    SendCommand(0x0C);
+    SendData(0x8B);
+    SendData(0x9C);
+    SendData(0xA4);
+    SendData(0x0F);
+
+    Lut();
+
+    SendCommand(0x11);
+    SendData(0x03);
+
+    SendCommand(0x44); 
+    SendData(0x00);
+    SendData(0x31); 
+
+    SendCommand(0x45); 
+    SendData(0x00);
+    SendData(0x00); 
+    SendData(0x2B);
+    SendData(0x01);
+
+    SendCommand(0x4E);
+    SendData(0x00);
+
+    SendCommand(0x4F);
+    SendData(0x00);
+    SendData(0x00);
+    ReadBusy();
+  Serial.println("  Fin Init 4Gray");
 }
 
 
@@ -145,8 +221,8 @@ void Epd::SendData(unsigned char data) {
 /**
  *  @brief: Wait until the busy_pin goes HIGH
  */
-void Epd::WaitUntilIdle(void) {
-    while(DigitalRead(busy_pin) == 0) {      //0: busy, 1: idle
+void Epd::ReadBusy(void) {
+    while(DigitalRead(busy_pin) == 1) {      //1: busy, 0: idle
         // Wait
     }      
 }
@@ -157,424 +233,431 @@ void Epd::WaitUntilIdle(void) {
  *          see Epd::Sleep();
  */
 void Epd::Reset(void) {
-    DigitalWrite(reset_pin, LOW);
-    DelayMs(2);
+    Serial.println("Resetting");
     DigitalWrite(reset_pin, HIGH);
-    DelayMs(20);
-    DigitalWrite(reset_pin, LOW);
-    DelayMs(2);
-    DigitalWrite(reset_pin, HIGH);
-    DelayMs(20);   
-    DigitalWrite(reset_pin, LOW);
-    DelayMs(2);
-    DigitalWrite(reset_pin, HIGH);
-    DelayMs(20);   
-}
-
-/**
- *  @brief: transmit partial data to the SRAM
- */
-void Epd::SetPartialWindow(const unsigned char* buffer_black, int x, int y, int w, int l) {
-    SendCommand(PARTIAL_IN);
-    SendCommand(PARTIAL_WINDOW);
-    SendData(x >> 8);
-    SendData(x & 0xf8);     // x should be the multiple of 8, the last 3 bit will always be ignored
-    SendData(((x & 0xf8) + w  - 1) >> 8);
-    SendData(((x & 0xf8) + w  - 1) | 0x07);
-    SendData(y >> 8);        
-    SendData(y & 0xff);
-    SendData((y + l - 1) >> 8);        
-    SendData((y + l - 1) & 0xff);
-    SendData(0x01);         // Gates scan both inside and outside of the partial window. (default) 
-    DelayMs(2);
-    SendCommand(DATA_START_TRANSMISSION_2);
-    if (buffer_black != NULL) {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(buffer_black[i]);  
-        }  
-    } else {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(0x00);  
-        }  
-    }
-    DelayMs(2);
-    SendCommand(PARTIAL_OUT);  
-}
-
-void Epd::Set_4GrayDisplay(const unsigned char *Image, int x, int y, int w, int l)
-{
-    int i,j,k,m;
-	int z=0;
-    unsigned char temp1,temp2,temp3;
-/****Color display description****
-      white  gray1  gray2  black
-0x10|  01     01     00     00
-0x13|  01     00     01     00
-*********************************/
-	SendCommand(0x10);
-	z=0;
-	x= x/8*8;
-	for(m = 0; m<EPD_HEIGHT;m++)
-		for(i=0;i<EPD_WIDTH/8;i++)
-		{
-			if(i >= x/8 && i <(x+w)/8 && m >= y && m < y+l){
-				
-				temp3=0;
-				for(j=0;j<2;j++)	
-				{
-					temp1 = pgm_read_byte(&Image[z*2+j]);
-					for(k=0;k<2;k++)	
-					{
-						temp2 = temp1&0xC0 ;
-						if(temp2 == 0xC0)
-							temp3 |= 0x01;//white
-						else if(temp2 == 0x00)
-							temp3 |= 0x00;  //black
-						else if(temp2 == 0x80) 
-							temp3 |= 0x01;  //gray1
-						else //0x40
-							temp3 |= 0x00; //gray2
-						temp3 <<= 1;	
-						
-						temp1 <<= 2;
-						temp2 = temp1&0xC0 ;
-						if(temp2 == 0xC0)  //white
-							temp3 |= 0x01;
-						else if(temp2 == 0x00) //black
-							temp3 |= 0x00;
-						else if(temp2 == 0x80)
-							temp3 |= 0x01; //gray1
-						else    //0x40
-								temp3 |= 0x00;	//gray2	
-						if(j!=1 || k!=1)				
-							temp3 <<= 1;
-						
-						temp1 <<= 2;
-					}
-				}
-				z++;
-				SendData(temp3);
-				
-			}else{
-				SendData(0xff);
-			}				
-		}
-    // new  data
-    SendCommand(0x13);
-	z=0;
-	for(m = 0; m<EPD_HEIGHT;m++)
-		for(i=0;i<EPD_WIDTH/8;i++)
-		{
-			if(i >= x/8 && i <(x+w)/8 && m >= y && m < y+l){
-				
-				temp3=0;
-				for(j=0;j<2;j++)	
-				{
-					temp1 = pgm_read_byte(&Image[z*2+j]);
-					for(k=0;k<2;k++)	
-					{
-						temp2 = temp1&0xC0 ;
-						if(temp2 == 0xC0)
-							temp3 |= 0x01;//white
-						else if(temp2 == 0x00)
-							temp3 |= 0x00;  //black
-						else if(temp2 == 0x80) 
-							temp3 |= 0x00;  //gray1
-						else //0x40
-							temp3 |= 0x01; //gray2
-						temp3 <<= 1;	
-						
-						temp1 <<= 2;
-						temp2 = temp1&0xC0 ;
-						if(temp2 == 0xC0)  //white
-							temp3 |= 0x01;
-						else if(temp2 == 0x00) //black
-							temp3 |= 0x00;
-						else if(temp2 == 0x80)
-							temp3 |= 0x00; //gray1
-						else    //0x40
-								temp3 |= 0x01;	//gray2
-						if(j!=1 || k!=1)					
-							temp3 <<= 1;
-						
-						temp1 <<= 2;
-					}
-				}
-				z++;
-				SendData(temp3);	
-			}else {
-				SendData(0xff);	
-			}
-		}
-    
-    set4Gray_lut();
-    SendCommand(DISPLAY_REFRESH); 
     DelayMs(100);
-    WaitUntilIdle();
+    DigitalWrite(reset_pin, LOW);
+    DelayMs(2);
+    DigitalWrite(reset_pin, HIGH);
+    DelayMs(100);   
+    Serial.println("  Finished Reset");
 }
+
 /**
- *  @brief: set the look-up table
+ *  @brief: Turn On Display
  */
-void Epd::SetLut(void) {
-    unsigned int count;     
-    SendCommand(LUT_FOR_VCOM);                            //vcom
-    for(count = 0; count < 36; count++) {
-        SendData(lut_vcom0[count]);
-    }
-    
-    SendCommand(LUT_WHITE_TO_WHITE);                      //ww --
-    for(count = 0; count < 36; count++) {
-        SendData(lut_ww[count]);
-    }   
-    
-    SendCommand(LUT_BLACK_TO_WHITE);                      //bw r
-    for(count = 0; count < 36; count++) {
-        SendData(lut_bw[count]);
-    } 
-
-    SendCommand(LUT_WHITE_TO_BLACK);                      //wb w
-    for(count = 0; count < 36; count++) {
-        SendData(lut_bb[count]);
-    } 
-
-    SendCommand(LUT_BLACK_TO_BLACK);                      //bb b
-    for(count = 0; count < 36; count++) {
-        SendData(lut_wb[count]);
-    } 
-}
-
-void Epd::set4Gray_lut(void)
+void Epd::TurnOnDisplay(void)
 {
-	unsigned int count;	 
-	{
-		SendCommand(0x20);							//vcom
-		for(count=0;count<42;count++)
-			{SendData(EPD_4IN2_4Gray_lut_vcom[count]);}
-		
-		SendCommand(0x21);							//red not use
-		for(count=0;count<42;count++)
-			{SendData(EPD_4IN2_4Gray_lut_ww[count]);}
-
-		SendCommand(0x22);							//bw r
-		for(count=0;count<42;count++)
-			{SendData(EPD_4IN2_4Gray_lut_bw[count]);}
-
-		SendCommand(0x23);							//wb w
-		for(count=0;count<42;count++)
-			{SendData(EPD_4IN2_4Gray_lut_wb[count]);}
-
-		SendCommand(0x24);							//bb b
-		for(count=0;count<42;count++)
-			{SendData(EPD_4IN2_4Gray_lut_bb[count]);}
-
-		SendCommand(0x25);							//vcom
-		for(count=0;count<42;count++)
-			{SendData(EPD_4IN2_4Gray_lut_ww[count]);}
-	}	         
+    SendCommand(0x22);
+	SendData(0xF7);
+    SendCommand(0x20);
+    ReadBusy();
 }
-/**
- * @brief: refresh and displays the frame
- */
-void Epd::DisplayFrame(const unsigned char* frame_buffer) {
-    SendCommand(RESOLUTION_SETTING);
-    SendData(width >> 8);        
-    SendData(width & 0xff);
-    SendData(height >> 8);
-    SendData(height & 0xff);
 
-    SendCommand(VCM_DC_SETTING);
-    SendData(0x12);                   
+void Epd::TurnOnDisplay_Fast(void)
+{
+    SendCommand(0x22);
+	SendData(0xC7);
+    SendCommand(0x20);
+    ReadBusy();
+}
 
-    SendCommand(VCOM_AND_DATA_INTERVAL_SETTING);
-    SendCommand(0x97);    //VBDF 17|D7 VBDW 97  VBDB 57  VBDF F7  VBDW 77  VBDB 37  VBDR B7
+void Epd::TurnOnDisplay_Partial(void)
+{
+    SendCommand(0x22);
+	SendData(0xFF);
+    SendCommand(0x20);
+    ReadBusy();
+}
 
-    if (frame_buffer != NULL) {
-        SendCommand(DATA_START_TRANSMISSION_1);
-        for(int i = 0; i < width / 8 * height; i++) {
-            SendData(0xFF);      // bit set: white, bit reset: black
+void Epd::TurnOnDisplay_4Gray(void)
+{
+    SendCommand(0x22);
+	SendData(0xCF);
+    SendCommand(0x20);
+    ReadBusy();
+}
+
+/******************************************************************************
+function :	Sends the image buffer in RAM to e-Paper and displays
+parameter:
+******************************************************************************/
+void Epd::Clear(void)
+{
+	unsigned int Width, Height;
+	Width = (width % 8 == 0)? (width / 8 ): (width / 8 + 1);
+	Height = height;
+
+	SendCommand(0x24);
+	for (unsigned int j = 0; j < Height; j++) {
+        for (unsigned int i = 0; i < Width; i++) {
+            SendData(0xff);
         }
-        DelayMs(2);
-        SendCommand(DATA_START_TRANSMISSION_2); 
-        for(int i = 0; i < width / 8 * height; i++) {
-            SendData(pgm_read_byte(&frame_buffer[i]));
-        }  
-        DelayMs(2);                  
+	}
+    SendCommand(0x26);
+    for (unsigned int j = 0; j < Height; j++) {
+        for (unsigned int i = 0; i < Width; i++) {
+            SendData(0xff);
+        }
+	}
+	TurnOnDisplay_4Gray();
+}
+
+void Epd::Display(const unsigned char* Image)
+{
+	unsigned int Width, Height;
+	Width = (width % 8 == 0)? (width / 8 ): (width / 8 + 1);
+	Height = height;
+
+	SendCommand(0x24);
+	for (unsigned int j = 0; j < Height; j++) {
+        for (unsigned int i = 0; i < Width; i++) {
+            SendData(pgm_read_byte(&Image[i + j * Width]));
+        }
+	}
+    SendCommand(0x26);
+    for (unsigned int j = 0; j < Height; j++) {
+        for (unsigned int i = 0; i < Width; i++) {
+            SendData(pgm_read_byte(&Image[i + j * Width]));
+        }
+	}
+	TurnOnDisplay();
+}
+
+void Epd::Display_Fast(const unsigned char* Image)
+{
+	unsigned int Width, Height;
+	Width = (width % 8 == 0)? (width / 8 ): (width / 8 + 1);
+	Height = height;
+
+	SendCommand(0x24);
+	for (unsigned int j = 0; j < Height; j++) {
+        for (unsigned int i = 0; i < Width; i++) {
+            SendData(pgm_read_byte(&Image[i + j * Width]));
+        }
+	}
+    SendCommand(0x26);
+	for (unsigned int j = 0; j < Height; j++) {
+        for (unsigned int i = 0; i < Width; i++) {
+            SendData(pgm_read_byte(&Image[i + j * Width]));
+        }
+	}
+	TurnOnDisplay_Fast();
+}
+
+void Epd::Display_Base(const unsigned char* Image)
+{
+	unsigned int Width, Height;
+	Width = (width % 8 == 0)? (width / 8 ): (width / 8 + 1);
+	Height = height;
+
+	SendCommand(0x24);   //Write Black and White image to RAM
+	for (unsigned int j = 0; j < Height; j++) {
+        for (unsigned int i = 0; i < Width; i++) {
+            SendData(pgm_read_byte(&Image[i + j * Width]));
+        }
+	}
+	SendCommand(0x26);   //Write Black and White image to RAM
+	for (unsigned int j = 0; j < Height; j++) {
+        for (unsigned int i = 0; i < Width; i++) {
+            SendData(pgm_read_byte(&Image[i + j * Width]));
+        }
+	}
+	TurnOnDisplay();	
+}
+
+void Epd::Display_Partial(unsigned char* Image, unsigned int  Xstart, unsigned int  Ystart, unsigned int  Xend, unsigned int  Yend)
+{
+
+    unsigned int  i, Width;
+    unsigned int  IMAGE_COUNTER;
+
+    if((Xstart % 8 + Xend % 8 == 8 && Xstart % 8 > Xend % 8) || Xstart % 8 + Xend % 8 == 0 || (Xend - Xstart)%8 == 0)
+	{
+        Xstart = Xstart / 8 ;
+        Xend = Xend / 8;
+	}
+	else
+	{
+        Xstart = Xstart / 8 ;
+        Xend = Xend % 8 == 0 ? Xend / 8 : Xend / 8 + 1;
+	}
+	
+	Width = Xend -  Xstart;
+	IMAGE_COUNTER = Width * (Yend-Ystart);
+    Serial.println(IMAGE_COUNTER);
+
+	Xend -= 1;
+	Yend -= 1;	
+	// Reset
+	Reset();
+
+	SendCommand(0x3C); // BorderWavefrom
+	SendData(0x80);	
+    
+    SendCommand(0x21); 
+	SendData(0x00);
+	SendData(0x00);
+
+	SendCommand(0x3C); 
+	SendData(0x80); 
+	//	    
+	SendCommand(0x44);       // set RAM x address start/end, in page 35
+	SendData(Xstart & 0xff);    // RAM x address start at 00h;
+	SendData(Xend & 0xff);    // RAM x address end at 0fh(15+1)*8->128 
+	SendCommand(0x45);       // set RAM y address start/end, in page 35
+	SendData(Ystart & 0xff);    // RAM y address start at 0127h;
+	SendData((Ystart>>8) & 0x01);    // RAM y address start at 0127h;
+	SendData(Yend & 0xff);    // RAM y address end at 00h;
+	SendData((Yend>>8) & 0x01); 
+
+	SendCommand(0x4E);   // set RAM x address count to 0;
+	SendData(Xstart & 0xff); 
+	SendCommand(0x4F);   // set RAM y address count to 0X127;    
+	SendData(Ystart & 0xff);
+	SendData((Ystart>>8) & 0x01);
+
+
+	SendCommand(0x24);   //Write Black and White image to RAM
+	for (i = 0; i < IMAGE_COUNTER; i++) {
+		SendData(Image[i]);
+	}
+	TurnOnDisplay_Partial();
+}
+
+void Epd::Display_Partial_Not_refresh(unsigned char* Image, unsigned int  Xstart, unsigned int  Ystart, unsigned int  Xend, unsigned int  Yend)
+{
+
+    unsigned int  i, Width;
+    unsigned int  IMAGE_COUNTER;
+
+    if((Xstart % 8 + Xend % 8 == 8 && Xstart % 8 > Xend % 8) || Xstart % 8 + Xend % 8 == 0 || (Xend - Xstart)%8 == 0)
+	{
+        Xstart = Xstart / 8 ;
+        Xend = Xend / 8;
+	}
+	else
+	{
+        Xstart = Xstart / 8 ;
+        Xend = Xend % 8 == 0 ? Xend / 8 : Xend / 8 + 1;
+	}
+	
+	Width = Xend -  Xstart;
+	IMAGE_COUNTER = Width * (Yend-Ystart);
+    Serial.println(IMAGE_COUNTER);
+
+	Xend -= 1;
+	Yend -= 1;	
+	//Reset
+	Reset();
+
+	SendCommand(0x3C); //BorderWavefrom
+	SendData(0x80);	
+
+    SendCommand(0x21); 
+	SendData(0x00);
+	SendData(0x00);
+
+	SendCommand(0x3C); 
+	SendData(0x80); 
+	//	    
+	SendCommand(0x44);       // set RAM x address start/end, in page 35
+	SendData(Xstart & 0xff);    // RAM x address start at 00h;
+	SendData(Xend & 0xff);    // RAM x address end at 0fh(15+1)*8->128 
+	SendCommand(0x45);       // set RAM y address start/end, in page 35
+	SendData(Ystart & 0xff);    // RAM y address start at 0127h;
+	SendData((Ystart>>8) & 0x01);    // RAM y address start at 0127h;
+	SendData(Yend & 0xff);    // RAM y address end at 00h;
+	SendData((Yend>>8) & 0x01); 
+
+	SendCommand(0x4E);   // set RAM x address count to 0;
+	SendData(Xstart & 0xff); 
+	SendCommand(0x4F);   // set RAM y address count to 0X127;    
+	SendData(Ystart & 0xff);
+	SendData((Ystart>>8) & 0x01);
+
+
+	SendCommand(0x24);   //Write Black and White image to RAM
+	for (i = 0; i < IMAGE_COUNTER; i++) {
+		SendData(Image[i]);
+	}
+	// TurnOnDisplay_Partial();
+}
+
+void Epd::Set_4GrayDisplay(const unsigned char *imageData, int startX, int startY, int width, int height) {
+    // Reformatted and renamed variables, added comments for clarity
+
+    // Variables for iteration and temporary data processing
+    int row, col;
+    int imageIndex = 0;
+    unsigned char currentByte, pixelPair, processedByte;
+
+    /*** Color display description ***
+     *       white  gray1  gray2  black
+     * 0x10 |  01     01     00     00
+     * 0x13 |  01     00     01     00
+     ********************************/
+
+    // Send initial data command for the display
+    SendCommand(0x24);
+    imageIndex = 0;
+    startX = (startX / 8) * 8; // Align startX to the nearest byte boundary
+
+    // Iterate over the display height and width
+    for (row = 0; row < EPD_HEIGHT; row++) {
+        for (col = 0; col < EPD_WIDTH / 8; col++) {
+
+            // Check if the current pixel is within the specified drawing area
+            if (col >= startX / 8 && col < (startX + width) / 8 && row >= startY && row < startY + height) {
+
+                processedByte = 0;
+                for (int subRow = 0; subRow < 2; subRow++) {
+                    currentByte = pgm_read_byte(&imageData[imageIndex * 2 + subRow]);
+
+                    for (int subCol = 0; subCol < 2; subCol++) {
+                        // Extract the top two bits of the current byte
+                        pixelPair = currentByte & 0xC0;
+
+                        // Map pixel values to the correct display colors
+                        if (pixelPair == 0xC0)
+                            processedByte |= 0x01; // White
+                        else if (pixelPair == 0x00)
+                            processedByte |= 0x00; // Black
+                        else if (pixelPair == 0x40)
+                            processedByte |= 0x01; // Dark gray
+                        else
+                            processedByte |= 0x00; // Light gray
+
+                        processedByte <<= 1; // Shift to prepare for the next pixel
+                        currentByte <<= 2;   // Move to the next pixel pair
+
+                        // Handle the second pixel in the pair
+                        pixelPair = currentByte & 0xC0;
+                        if (pixelPair == 0xC0)
+                            processedByte |= 0x01; // White
+                        else if (pixelPair == 0x00)
+                            processedByte |= 0x00; // Black
+                        else if (pixelPair == 0x40)
+                            processedByte |= 0x01; // Dark gray
+                        else
+                            processedByte |= 0x00; // Light gray 
+
+                        if (subRow != 1 || subCol != 1) // Avoid extra shift at the end
+                            processedByte <<= 1;
+
+                        currentByte <<= 2;
+                    }
+                }
+                imageIndex++;
+                SendData(processedByte);
+
+            } else {
+                SendData(0xFF); // Fill unused areas with white
+            }
+        }
     }
 
-    SendCommand(0x12); 
-    DelayMs(100);
-    WaitUntilIdle();
+    // Send updated data to the display
+    SendCommand(0x26);
+    imageIndex = 0;
+
+    // Repeat the same logic for the new data
+    for (row = 0; row < EPD_HEIGHT; row++) {
+        for (col = 0; col < EPD_WIDTH / 8; col++) {
+
+            if (col >= startX / 8 && col < (startX + width) / 8 && row >= startY && row < startY + height) {
+
+                processedByte = 0;
+                for (int subRow = 0; subRow < 2; subRow++) {
+                    currentByte = pgm_read_byte(&imageData[imageIndex * 2 + subRow]);
+
+                    for (int subCol = 0; subCol < 2; subCol++) {
+                        pixelPair = currentByte & 0xC0;
+
+                        if (pixelPair == 0xC0)
+                            processedByte |= 0x01; // White
+                        else if (pixelPair == 0x00)
+                            processedByte |= 0x00; // Black
+                        else if (pixelPair == 0x40)
+                            processedByte |= 0x00; // Gray1
+                        else
+                            processedByte |= 0x01; // Gray2
+
+                        processedByte <<= 1;
+                        currentByte <<= 2;
+
+                        pixelPair = currentByte & 0xC0;
+                        if (pixelPair == 0xC0)
+                            processedByte |= 0x01; // White
+                        else if (pixelPair == 0x00)
+                            processedByte |= 0x00; // Black
+                        else if (pixelPair == 0x40)
+                            processedByte |= 0x00; // Gray1
+                        else
+                            processedByte |= 0x01; // Gray2
+
+                        if (subRow != 1 || subCol != 1)
+                            processedByte <<= 1;
+
+                        currentByte <<= 2;
+                    }
+                }
+                imageIndex++;
+                SendData(processedByte);
+
+            } else {
+                SendData(0xFF); // Fill unused areas with white
+            }
+        }
+    }
+
+    // Finalize the display update
+    TurnOnDisplay_4Gray();
+    Serial.println("Finished turning on Display");
 }
 
-/**
- * @brief: clear the frame data from the SRAM, this won't refresh the display
- */
-void Epd::ClearFrame(void) {
-    SendCommand(RESOLUTION_SETTING);
-    SendData(width >> 8);
-    SendData(width & 0xff);
-    SendData(height >> 8);        
-    SendData(height & 0xff);
-
-    SendCommand(DATA_START_TRANSMISSION_1);           
-    DelayMs(2);
-    for(int i = 0; i < width / 8 * height; i++) {
-        SendData(0xFF);  
-    }  
-    DelayMs(2);
-    SendCommand(DATA_START_TRANSMISSION_2);           
-    DelayMs(2);
-    for(int i = 0; i < width / 8 * height; i++) {
-        SendData(0xFF);  
-    }  
-    DelayMs(2);
-}
-
-/**
- * @brief: This displays the frame data from SRAM
- */
-void Epd::DisplayFrame(void) {
-    SetLut();
-    SendCommand(DISPLAY_REFRESH); 
-    DelayMs(100);
-    WaitUntilIdle();
-}
-
-/**
- * @brief: After this command is transmitted, the chip would enter the deep-sleep mode to save power. 
- *         The deep sleep mode would return to standby by hardware reset. The only one parameter is a 
- *         check code, the command would be executed if check code = 0xA5. 
- *         You can use Epd::Reset() to awaken and use Epd::Init() to initialize.
- */
 void Epd::Sleep() {
-    SendCommand(VCOM_AND_DATA_INTERVAL_SETTING);
-    SendData(0x17);                       //border floating    
-    SendCommand(VCM_DC_SETTING);          //VCOM to 0V
-    SendCommand(PANEL_SETTING);
+    SendCommand(0x10);  
+    SendData(0x01);        
     DelayMs(100);          
-
-    SendCommand(POWER_SETTING);           //VG&VS to 0V fast
-    SendData(0x00);        
-    SendData(0x00);        
-    SendData(0x00);              
-    SendData(0x00);        
-    SendData(0x00);
-    DelayMs(100);          
-                
-    SendCommand(POWER_OFF);          //power off
-    WaitUntilIdle();
-    SendCommand(DEEP_SLEEP);         //deep sleep
-    SendData(0xA5);
 }
 
-const unsigned char lut_vcom0[] =
-{
-    0x00, 0x08, 0x08, 0x00, 0x00, 0x02,  
-  0x00, 0x0F, 0x0F, 0x00, 0x00, 0x01, 
-  0x00, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00,   
-
-};
-const unsigned char lut_ww[] ={
-  0x50, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x90, 0x0F, 0x0F, 0x00, 0x00, 0x01, 
-  0xA0, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-
-};
-const unsigned char lut_bw[] ={
-  0x50, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x90, 0x0F, 0x0F, 0x00, 0x00, 0x01, 
-  0xA0, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-      
-};
-
-const unsigned char lut_bb[] ={
-  0xA0, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x90, 0x0F, 0x0F, 0x00, 0x00, 0x01, 
-  0x50, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-             
-};
-
-const unsigned char lut_wb[] ={
-  0x20, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x90, 0x0F, 0x0F, 0x00, 0x00, 0x01, 
-  0x10, 0x08, 0x08, 0x00, 0x00, 0x02, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-            
-};
-
-/******************************gray*********************************/
-//0~3 gray
-const unsigned char EPD_4IN2_4Gray_lut_vcom[] =
-{
-0x00	,0x0A	,0x00	,0x00	,0x00	,0x01,
-0x60	,0x14	,0x14	,0x00	,0x00	,0x01,
-0x00	,0x14	,0x00	,0x00	,0x00	,0x01,
-0x00	,0x13	,0x0A	,0x01	,0x00	,0x01,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00
-				
-};
-//R21
-const unsigned char EPD_4IN2_4Gray_lut_ww[] ={
-0x40	,0x0A	,0x00	,0x00	,0x00	,0x01,
-0x90	,0x14	,0x14	,0x00	,0x00	,0x01,
-0x10	,0x14	,0x0A	,0x00	,0x00	,0x01,
-0xA0	,0x13	,0x01	,0x00	,0x00	,0x01,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-};
-//R22H	r
-const unsigned char EPD_4IN2_4Gray_lut_bw[] ={
-0x40	,0x0A	,0x00	,0x00	,0x00	,0x01,
-0x90	,0x14	,0x14	,0x00	,0x00	,0x01,
-0x00	,0x14	,0x0A	,0x00	,0x00	,0x01,
-0x99	,0x0C	,0x01	,0x03	,0x04	,0x01,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-};
-//R23H	w
-const unsigned char EPD_4IN2_4Gray_lut_wb[] ={
-0x40	,0x0A	,0x00	,0x00	,0x00	,0x01,
-0x90	,0x14	,0x14	,0x00	,0x00	,0x01,
-0x00	,0x14	,0x0A	,0x00	,0x00	,0x01,
-0x99	,0x0B	,0x04	,0x04	,0x01	,0x01,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-};
-//R24H	b
-const unsigned char EPD_4IN2_4Gray_lut_bb[] ={
-0x80	,0x0A	,0x00	,0x00	,0x00	,0x01,
-0x90	,0x14	,0x14	,0x00	,0x00	,0x01,
-0x20	,0x14	,0x0A	,0x00	,0x00	,0x01,
-0x50	,0x13	,0x01	,0x00	,0x00	,0x01,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-0x00	,0x00	,0x00	,0x00	,0x00	,0x00,
-};
+const unsigned char LUT_ALL[233]={							
+0x01,	0x0A,	0x1B,	0x0F,	0x03,	0x01,	0x01,	
+0x05,	0x0A,	0x01,	0x0A,	0x01,	0x01,	0x01,	
+0x05,	0x08,	0x03,	0x02,	0x04,	0x01,	0x01,	
+0x01,	0x04,	0x04,	0x02,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x0A,	0x1B,	0x0F,	0x03,	0x01,	0x01,	
+0x05,	0x4A,	0x01,	0x8A,	0x01,	0x01,	0x01,	
+0x05,	0x48,	0x03,	0x82,	0x84,	0x01,	0x01,	
+0x01,	0x84,	0x84,	0x82,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x0A,	0x1B,	0x8F,	0x03,	0x01,	0x01,	
+0x05,	0x4A,	0x01,	0x8A,	0x01,	0x01,	0x01,	
+0x05,	0x48,	0x83,	0x82,	0x04,	0x01,	0x01,	
+0x01,	0x04,	0x04,	0x02,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x8A,	0x1B,	0x8F,	0x03,	0x01,	0x01,	
+0x05,	0x4A,	0x01,	0x8A,	0x01,	0x01,	0x01,	
+0x05,	0x48,	0x83,	0x02,	0x04,	0x01,	0x01,	
+0x01,	0x04,	0x04,	0x02,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x8A,	0x9B,	0x8F,	0x03,	0x01,	0x01,	
+0x05,	0x4A,	0x01,	0x8A,	0x01,	0x01,	0x01,	
+0x05,	0x48,	0x03,	0x42,	0x04,	0x01,	0x01,	
+0x01,	0x04,	0x04,	0x42,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x01,	0x00,	0x00,	0x00,	0x00,	0x01,	0x01,	
+0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	
+0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	
+0x02,	0x00,	0x00,	0x07,	0x17,	0x41,	0xA8,	
+0x32,	0x30,						
+};	
 
 
 /* END OF FILE */

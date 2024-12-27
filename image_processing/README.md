@@ -27,4 +27,4 @@ Place horizontal images in the `/input_images` directory before running the scri
 python main.py
 ```
 
-The color images are converted to binary images (each pixel is either pure black or white) using the Floyd-Steinberg dithering algorithm. If you want to load the BMP files from an SD card, you are done. Otherwise, the scsript will generate a header file with the bitmaps loaded as a list of char arrays.
+The color images are converted to grayscale images using the Floyd-Steinberg dithering algorithm. If you want to load the BMP files from an SD card, you are done. Otherwise, the scsript will generate a header file with the bitmaps loaded as a list of char arrays.

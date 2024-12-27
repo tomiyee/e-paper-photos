@@ -25,8 +25,12 @@
  */
 
 #include <EEPROM.h>
+#include <SPI.h>
 #include "epd4in2.h"
-#include "custom_bitmaps.h"
+#include "sd_helpers.h"
+// Uncomment the next line if opting for the bitmap header file
+// #include "custom_bitmaps.h"
+// @todo reimplement custom-bitmap code to conveniently swap between them.
 
 #define COLORED 0
 #define UNCOLORED 1
@@ -35,36 +39,43 @@
 // define the number of bytes (max 512) you want to access
 #define EEPROM_SIZE 1
 
-// sizeof gives the full size of the array. To get the number of items, divide b the size of one element.
-const int numImages = sizeof(bitmaps) / sizeof(bitmaps[0]);
+/* Conversion factor for micro seconds to seconds */
+#define uS_TO_S_FACTOR 1000000
+/** Time ESP32 will go to sleep (in seconds) (Can't be 1H or more due to uS repr as 64 bit) */
+#define TIME_TO_SLEEP 1800
 
-#define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP 30       /* Time ESP32 will go to sleep (in seconds) */
-
-RTC_DATA_ATTR int bootCount = 0;
-
-Epd epd;
 void setup()
 {
-  EEPROM.begin(EEPROM_SIZE);
+  Serial.begin(115200);
+  initSD();
+  
   // Schedules a time to automatically wake up from deep sleep
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
 
-  epd.Init_4Gray();
-  epd.ClearFrame();
-
   // Incrememnt Index by one, looping back around if necessary
+  const int numImages = countFilesInDir("/bitmaps");
+  EEPROM.begin(EEPROM_SIZE);
   const int i = (EEPROM.read(IMAGE_INDEX_ADDRESS) + 1) % numImages;
-  // Show the image of the appropriate index
-  epd.Set_4GrayDisplay(bitmaps[i], 0, 0, 400, 300);
-  // Update persistent storage
   EEPROM.write(IMAGE_INDEX_ADDRESS, i);
   EEPROM.commit();
 
+  const ImageBuffer imageBuffer = loadImage("/bitmaps", i);
+  Epd epd;
+  epd.Reset();
+  /* This clears the SRAM of the e-paper display */
+  epd.Clear();
+  epd.Init_4Gray();
+
+
+  // Show the image of the appropriate index
+  epd.Set_4GrayDisplay((const unsigned char *)imageBuffer.data, 0, 0, 400, 300);
+  free(imageBuffer.data);
+  
+  epd.Sleep();
   // Sleep. When it wakes, it will re-run setup
   esp_deep_sleep_start();
 }
 
-void loop()
-{
-}
+// When it wakes from deep sleep, it re-runs setup, so loop is unnecessary. 
+void loop() {}
+
